@@ -154,6 +154,7 @@ def test_mount_preflight_rejects_an_unwritable_authentication_root(
         require_persistent_profile_mount(profile, mountinfo_path=mountinfo)
 
     assert "mkdir -p ~/.linkedin-mcp" not in str(error.value)
+    assert "linkedin-mcp-data:/home/pwuser/.linkedin-mcp" in str(error.value)
     assert marker.read_text(encoding="utf-8") == "unchanged"
 
 

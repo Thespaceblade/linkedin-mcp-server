@@ -166,7 +166,10 @@ def _require_a_writable_auth_root(auth_root: Path, *, profile: Path) -> None:
     raise LoginViewerError(
         f"--login-viewer cannot write the authentication root {auth_root}: "
         f"{existing} is not writable{identity}. {create}, or repair a root-owned "
-        f"one with {repair}."
+        f"one with {repair}. Under rootless Docker a host bind of ~/.linkedin-mcp "
+        f"appears as root:root inside the container — host chown does not help; "
+        f"mount a named volume instead "
+        f"(-v linkedin-mcp-data:/home/pwuser/.linkedin-mcp)."
     )
 
 

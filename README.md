@@ -331,6 +331,18 @@ Open the full URL the command prints (it carries the access token) and sign in. 
 
 Keep the same host directory mounted at `/home/pwuser/.linkedin-mcp` on every later `docker run`, otherwise the server cannot find the session.
 
+**Rootless Docker:** a bind mount of `~/.linkedin-mcp` is presented inside the container as `root:root`, while the image runs as `pwuser` (UID 1000), so `--login-viewer` refuses to write. Do not `chown` the host directory to "fix" that — under the rootless user namespace, your ownership *is* container UID 0. Use a named volume instead (Docker seeds it from the image as `pwuser`):
+
+```bash
+docker run -it --rm \
+  -v linkedin-mcp-data:/home/pwuser/.linkedin-mcp \
+  -p 127.0.0.1:6080:6080 \
+  stickerdaniel/linkedin-mcp-server:latest \
+  --login --login-viewer
+```
+
+Reuse `-v linkedin-mcp-data:/home/pwuser/.linkedin-mcp` on every later `docker run` for that daemon.
+
 **Configure Claude Desktop with Docker**
 
 **macOS / Linux (absolute path in JSON):**
@@ -489,7 +501,8 @@ belongs behind something that provides it.
 
 - Make sure [Docker](https://www.docker.com/get-started/) is installed
 - Check if Docker is running: `docker ps`
-- *Permission errors on `~/.linkedin-mcp`*: an older rootful Docker run may have created the directory as root. Fix it with `sudo chown -R "$(id -u):$(id -g)" ~/.linkedin-mcp`.
+- *Permission errors on `~/.linkedin-mcp` (rootful Docker)*: an older rootful run may have created the directory as root. Fix it with `sudo chown -R "$(id -u):$(id -g)" ~/.linkedin-mcp`.
+- *Permission errors under rootless Docker*: a host bind of `~/.linkedin-mcp` appears as `root:root` inside the container, so `pwuser` cannot write it. `chown` on the host does not help. Mount a named volume instead: `-v linkedin-mcp-data:/home/pwuser/.linkedin-mcp` (see [Authentication](#authentication)).
 
 **Login issues:**
 
