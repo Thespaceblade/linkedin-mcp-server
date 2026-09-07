@@ -567,6 +567,19 @@ def test_the_documented_bind_mount_is_created_by_the_host_user() -> None:
         assert 'sudo chown -R "$(id -u):$(id -g)" ~/.linkedin-mcp' in document
 
 
+def test_rootless_docker_is_documented_with_a_named_volume() -> None:
+    """Rootless bind mounts of ~/.linkedin-mcp are unwritable (#782).
+
+    Mutation target: drop the named-volume recipe or the rootless warning
+    from either document. Users would then keep applying the rootful chown
+    advice, which cannot fix the userns mapping.
+    """
+    for document in (_README, _DOCKER_GUIDE):
+        assert "Rootless Docker" in document
+        assert "linkedin-mcp-data:/home/pwuser/.linkedin-mcp" in document
+        assert "does not help" in document
+
+
 def _documented_client_mounts(document: str) -> list[str]:
     """Every ``-v`` value an MCP client would hand to ``docker`` verbatim."""
     mounts: list[str] = []

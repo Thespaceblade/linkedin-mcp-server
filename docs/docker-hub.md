@@ -58,6 +58,18 @@ Keep the same host directory mounted at `/home/pwuser/.linkedin-mcp` on every la
 
 If an older rootful Docker run left that host directory owned by root, repair it with `sudo chown -R "$(id -u):$(id -g)" ~/.linkedin-mcp`.
 
+**Rootless Docker:** a bind mount of `~/.linkedin-mcp` appears as `root:root` inside the container while the image runs as `pwuser`, so login refuses to write. Host `chown` does not help under the rootless user namespace. Use a named volume instead:
+
+```bash
+docker run -it --rm \
+  -v linkedin-mcp-data:/home/pwuser/.linkedin-mcp \
+  -p 127.0.0.1:6080:6080 \
+  stickerdaniel/linkedin-mcp-server:latest \
+  --login --login-viewer
+```
+
+Reuse that volume name on every later `docker run`.
+
 **Configure Claude Desktop with Docker**
 
 **macOS / Linux (absolute path in JSON):**
